@@ -1,0 +1,134 @@
+<html><head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <title>user position</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .FeaturePoint {
+            width: 5px;
+            height: 5px;
+            position: absolute;
+            background-color: red;
+            border-radius: 50%;
+        }
+    </style>
+    <script>
+        var feature_point_radius = 2.5;
+        var feature_point_container = [];
+        var file_path = 'D:\\hj\\map\\loc_data.txt';
+        var map_id = 0;
+        var z = 0;
+        var user_ip = "";
+        function Pos(attr){
+            this.x  = attr.x;
+            this.y = attr.y;
+        }
+        function FeaturePoint(attribute){
+            this.init(attribute);
+        }
+        FeaturePoint.prototype = {
+            init: function (attribute) {
+                this.x = attribute.x;
+                this.y = attribute.y;
+                this.pos_obj = attribute.pos;
+                this.canvas_obj = document.getElementById('canvas');
+            },
+            drawSelf: function () {
+                var feature_point = document.createElement('div');
+                feature_point.className = 'FeaturePoint';
+                feature_point.style.top = this.y - feature_point_radius + 'px';
+                feature_point.style.left = this.x - feature_point_radius + 'px';
+                //feature_point.innnerHTML = this.prru_obj.id;
+                feature_point.callBack = this.pos_obj;
+                this.canvas_obj.appendChild(feature_point);
+            }
+        };
+
+        function removePoint(obj){
+            var canvas_obj = document.getElementById('canvas');
+            canvas_obj.removeChild(obj);
+        }
+        function writeFile(){
+            var fso = new ActiveXObject('Scripting.FileSystemObject');
+            var s = '';
+            var loc_info = {};
+            for (var i = 0,len = feature_point_container.length;i < len;i++)
+            {
+                var pos_obj =feature_point_container[i];
+                loc_info["IdType"] = "IP";
+                loc_info["Timestamp"] = 0;
+                loc_info["datatype"] = "coordinates";
+                loc_info["eci"] = 2;
+                loc_info["extrainfo"] = {"logflag":true,"user_id":"0"};
+                loc_info["filterlocation"] = {"x": ~~pos_obj.x,"y": ~~pos_obj.y,"z": z};
+                loc_info["location"] = {"x": ~~pos_obj.x,"y": ~~pos_obj.y,"z": z};
+                loc_info["map"] = {"mapid": map_id.toString()};
+                loc_info["userid"] = [user_ip];
+                //s += loc_info.stringify();
+                s += JSON.stringify(loc_info);
+                s += '\n';
+            }
+            var f = fso.createtextFile(file_path,2,true);
+            f.write(s);
+            f.close();
+        }
+        function recordPosition(e){
+            if ('image' === e.target.className)
+            {
+                console.log(e.pageX, e.pageY);
+                //var prru_id = prompt('please input prru id');
+                //console.log(prru_id);
+                /*var prru_attr = {
+                    'x' : e.pageX,
+                    'y' : e.pageY,
+                    'prruId' : prru_id
+                };*/
+                var pos_attr = {
+                    'x': e.pageX / scale * 10,
+                    'y': e.pageY / scale * 10
+                };
+                //var prru_obj = new Prru(prru_attr);
+                var pos_obj = new Pos(pos_attr);
+                var point_attr = {
+                    'x' : e.pageX,
+                    'y' : e.pageY,
+                    'pos' : pos_obj
+                };
+                var feature_point = new FeaturePoint(point_attr);
+                feature_point.drawSelf();
+                feature_point_container.push(pos_obj);
+                writeFile();
+            }
+            if ('FeaturePoint' === e.target.className)
+            {
+                removePoint(e.target);
+                feature_point_container.splice(feature_point_container.lastIndexOf(e.target.callBack),1);
+                writeFile();
+            }
+        }
+        /*document.addEventListener('click',recordPosition);
+        window.onload  = function(){
+            user_ip = prompt('please input user ip');
+            map_id = parseInt(prompt('please input mapid'));
+            z = parseInt(0x000003ff & map_id);
+            if (1 == (z >> 9))
+            {
+                z |= 0xfffffc00;
+            }
+            scale = prompt('please input map scale');
+            scale = parseFloat(scale);
+            var image_name = prompt('please input map image name');
+            var map = document.getElementById('map');
+            map.src = image_name;
+        }*/
+    </script>
+</head>
+<body>
+    <div id="canvas">
+        <img class="image" id="map" alt="map" src="温江八益2F.png">
+    <div class="FeaturePoint" style="left: 784.5px; top: 308.5px;"></div><div class="FeaturePoint" style="left: 796.5px; top: 306.5px;"></div><div class="FeaturePoint" style="left: 812.5px; top: 304.5px;"></div><div class="FeaturePoint" style="left: 829.5px; top: 304.5px;"></div><div class="FeaturePoint" style="left: 844.5px; top: 302.5px;"></div><div class="FeaturePoint" style="left: 857.5px; top: 303.5px;"></div><div class="FeaturePoint" style="left: 868.5px; top: 302.5px;"></div><div class="FeaturePoint" style="left: 888.5px; top: 302.5px;"></div><div class="FeaturePoint" style="left: 900.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 911.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 925.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 941.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 953.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 967.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 982.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 995.5px; top: 300.5px;"></div><div class="FeaturePoint" style="left: 1003.5px; top: 300.5px;"></div><div class="FeaturePoint" style="left: 1019.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 1024.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 1041.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 1061.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 1081.5px; top: 301.5px;"></div><div class="FeaturePoint" style="left: 1105.5px; top: 300.5px;"></div><div class="FeaturePoint" style="left: 1128.5px; top: 300.5px;"></div><div class="FeaturePoint" style="left: 1141.5px; top: 299.5px;"></div><div class="FeaturePoint" style="left: 1167.5px; top: 299.5px;"></div><div class="FeaturePoint" style="left: 1183.5px; top: 299.5px;"></div><div class="FeaturePoint" style="left: 1213.5px; top: 297.5px;"></div><div class="FeaturePoint" style="left: 1251.5px; top: 297.5px;"></div><div class="FeaturePoint" style="left: 1277.5px; top: 298.5px;"></div><div class="FeaturePoint" style="left: 1309.5px; top: 301.5px;"></div></div>
+
+</body></html>

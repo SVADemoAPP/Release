@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <title>user position</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .FeaturePoint {
+            width: 5px;
+            height: 5px;
+            position: absolute;
+            background-color: red;
+            border-radius: 50%;
+        }
+    </style>
+    <script>
+        var feature_point_radius = 2.5;
+        var feature_point_container = [];
+        var file_path = 'D:\\hj\\map\\loc_data.txt';
+        var map_id = 0;
+        var z = 0;
+        var user_ip = "";
+        function Pos(attr){
+            this.x  = attr.x;
+            this.y = attr.y;
+        }
+        function FeaturePoint(attribute){
+            this.init(attribute);
+        }
+        FeaturePoint.prototype = {
+            init: function (attribute) {
+                this.x = attribute.x;
+                this.y = attribute.y;
+                this.pos_obj = attribute.pos;
+                this.canvas_obj = document.getElementById('canvas');
+            },
+            drawSelf: function () {
+                var feature_point = document.createElement('div');
+                feature_point.className = 'FeaturePoint';
+                feature_point.style.top = this.y - feature_point_radius + 'px';
+                feature_point.style.left = this.x - feature_point_radius + 'px';
+                //feature_point.innnerHTML = this.prru_obj.id;
+                feature_point.callBack = this.pos_obj;
+                this.canvas_obj.appendChild(feature_point);
+            }
+        };
+
+        function removePoint(obj){
+            var canvas_obj = document.getElementById('canvas');
+            canvas_obj.removeChild(obj);
+        }
+        function writeFile(){
+            var fso = new ActiveXObject('Scripting.FileSystemObject');
+            var s = '';
+            var loc_info = {};
+            for (var i = 0,len = feature_point_container.length;i < len;i++)
+            {
+                var pos_obj =feature_point_container[i];
+                loc_info["IdType"] = "IP";
+                loc_info["Timestamp"] = 0;
+                loc_info["datatype"] = "coordinates";
+                loc_info["eci"] = 2;
+                loc_info["extrainfo"] = {"logflag":true,"user_id":"0"};
+                loc_info["filterlocation"] = {"x": ~~pos_obj.x,"y": ~~pos_obj.y,"z": z};
+                loc_info["location"] = {"x": ~~pos_obj.x,"y": ~~pos_obj.y,"z": z};
+                loc_info["map"] = {"mapid": map_id.toString()};
+                loc_info["userid"] = [user_ip];
+                //s += loc_info.stringify();
+                s += JSON.stringify(loc_info);
+                s += '\n';
+            }
+            var f = fso.createtextFile(file_path,2,true);
+            f.write(s);
+            f.close();
+        }
+        function recordPosition(e){
+            if ('image' === e.target.className)
+            {
+                console.log(e.pageX, e.pageY);
+                //var prru_id = prompt('please input prru id');
+                //console.log(prru_id);
+                /*var prru_attr = {
+                    'x' : e.pageX,
+                    'y' : e.pageY,
+                    'prruId' : prru_id
+                };*/
+                var pos_attr = {
+                    'x': e.pageX / scale * 10,
+                    'y': e.pageY / scale * 10
+                };
+                //var prru_obj = new Prru(prru_attr);
+                var pos_obj = new Pos(pos_attr);
+                var point_attr = {
+                    'x' : e.pageX,
+                    'y' : e.pageY,
+                    'pos' : pos_obj
+                };
+                var feature_point = new FeaturePoint(point_attr);
+                feature_point.drawSelf();
+                feature_point_container.push(pos_obj);
+                writeFile();
+            }
+            if ('FeaturePoint' === e.target.className)
+            {
+                removePoint(e.target);
+                feature_point_container.splice(feature_point_container.lastIndexOf(e.target.callBack),1);
+                writeFile();
+            }
+        }
+        document.addEventListener('click',recordPosition);
+        window.onload  = function(){
+            user_ip = prompt('please input user ip');
+            map_id = parseInt(prompt('please input mapid'));
+            z = parseInt(0x000003ff & map_id);
+            if (1 == (z >> 9))
+            {
+                z |= 0xfffffc00;
+            }
+            scale = prompt('please input map scale');
+            scale = parseFloat(scale);
+            var image_name = prompt('please input map image name');
+            var map = document.getElementById('map');
+            map.src = image_name;
+        }
+    </script>
+</head>
+<body>
+    <div id = "canvas">
+        <img class = "image" id = "map" alt = "map" />
+    </div>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<html><head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <title>user position</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .FeaturePoint {
+            width: 5px;
+            height: 5px;
+            position: absolute;
+            background-color: red;
+            border-radius: 50%;
+        }
+    </style>
+    <script>
+        var feature_point_radius = 2.5;
+        var feature_point_container = [];
+        var file_path = 'D:\\hj\\map\\loc_data.txt';
+        var map_id = 0;
+        var z = 0;
+        var user_ip = "";
+        function Pos(attr){
+            this.x  = attr.x;
+            this.y = attr.y;
+        }
+        function FeaturePoint(attribute){
+            this.init(attribute);
+        }
+        FeaturePoint.prototype = {
+            init: function (attribute) {
+                this.x = attribute.x;
+                this.y = attribute.y;
+                this.pos_obj = attribute.pos;
+                this.canvas_obj = document.getElementById('canvas');
+            },
+            drawSelf: function () {
+                var feature_point = document.createElement('div');
+                feature_point.className = 'FeaturePoint';
+                feature_point.style.top = this.y - feature_point_radius + 'px';
+                feature_point.style.left = this.x - feature_point_radius + 'px';
+                //feature_point.innnerHTML = this.prru_obj.id;
+                feature_point.callBack = this.pos_obj;
+                this.canvas_obj.appendChild(feature_point);
+            }
+        };
+
+        function removePoint(obj){
+            var canvas_obj = document.getElementById('canvas');
+            canvas_obj.removeChild(obj);
+        }
+        function writeFile(){
+            var fso = new ActiveXObject('Scripting.FileSystemObject');
+            var s = '';
+            var loc_info = {};
+            for (var i = 0,len = feature_point_container.length;i < len;i++)
+            {
+                var pos_obj =feature_point_container[i];
+                loc_info["IdType"] = "IP";
+                loc_info["Timestamp"] = 0;
+                loc_info["datatype"] = "coordinates";
+                loc_info["eci"] = 2;
+                loc_info["extrainfo"] = {"logflag":true,"user_id":"0"};
+                loc_info["filterlocation"] = {"x": ~~pos_obj.x,"y": ~~pos_obj.y,"z": z};
+                loc_info["location"] = {"x": ~~pos_obj.x,"y": ~~pos_obj.y,"z": z};
+                loc_info["map"] = {"mapid": map_id.toString()};
+                loc_info["userid"] = [user_ip];
+                //s += loc_info.stringify();
+                s += JSON.stringify(loc_info);
+                s += '\n';
+            }
+            var f = fso.createtextFile(file_path,2,true);
+            f.write(s);
+            f.close();
+        }
+        function recordPosition(e){
+            if ('image' === e.target.className)
+            {
+                console.log(e.pageX, e.pageY);
+                //var prru_id = prompt('please input prru id');
+                //console.log(prru_id);
+                /*var prru_attr = {
+                    'x' : e.pageX,
+                    'y' : e.pageY,
+                    'prruId' : prru_id
+                };*/
+                var pos_attr = {
+                    'x': e.pageX / scale * 10,
+                    'y': e.pageY / scale * 10
+                };
+                //var prru_obj = new Prru(prru_attr);
+                var pos_obj = new Pos(pos_attr);
+                var point_attr = {
+                    'x' : e.pageX,
+                    'y' : e.pageY,
+                    'pos' : pos_obj
+                };
+                var feature_point = new FeaturePoint(point_attr);
+                feature_point.drawSelf();
+                feature_point_container.push(pos_obj);
+                writeFile();
+            }
+            if ('FeaturePoint' === e.target.className)
+            {
+                removePoint(e.target);
+                feature_point_container.splice(feature_point_container.lastIndexOf(e.target.callBack),1);
+                writeFile();
+            }
+        }
+        /*document.addEventListener('click',recordPosition);
+        window.onload  = function(){
+            user_ip = prompt('please input user ip');
+            map_id = parseInt(prompt('please input mapid'));
+            z = parseInt(0x000003ff & map_id);
+            if (1 == (z >> 9))
+            {
+                z |= 0xfffffc00;
+            }
+            scale = prompt('please input map scale');
+            scale = parseFloat(scale);
+            var image_name = prompt('please input map image name');
+            var map = document.getElementById('map');
+            map.src = image_name;
+        }*/
+    </script>
+</head>
+<body>
+    <div id="canvas">
+        <img class="image" id="map" alt="map" src="文殊院.jpg">
+    <div class="FeaturePoint" style="left: 2495.18px; top: 465.5px;"></div><div class="FeaturePoint" style="left: 2487.18px; top: 472.5px;"></div><div class="FeaturePoint" style="left: 2472.18px; top: 481.5px;"></div><div class="FeaturePoint" style="left: 2465.18px; top: 485.5px;"></div><div class="FeaturePoint" style="left: 2452.18px; top: 491.5px;"></div><div class="FeaturePoint" style="left: 2444.18px; top: 494.5px;"></div><div class="FeaturePoint" style="left: 2431.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 2418.18px; top: 502.5px;"></div><div class="FeaturePoint" style="left: 2408.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 2393.18px; top: 509.5px;"></div><div class="FeaturePoint" style="left: 2377.18px; top: 509.5px;"></div><div class="FeaturePoint" style="left: 2363.18px; top: 509.5px;"></div><div class="FeaturePoint" style="left: 2345.18px; top: 509.5px;"></div><div class="FeaturePoint" style="left: 2326.18px; top: 508.5px;"></div><div class="FeaturePoint" style="left: 2310.18px; top: 510.5px;"></div><div class="FeaturePoint" style="left: 2297.18px; top: 510.5px;"></div><div class="FeaturePoint" style="left: 2289.18px; top: 511.5px;"></div><div class="FeaturePoint" style="left: 2276.18px; top: 510.5px;"></div><div class="FeaturePoint" style="left: 2264.18px; top: 511.5px;"></div><div class="FeaturePoint" style="left: 2250.18px; top: 512.5px;"></div><div class="FeaturePoint" style="left: 2237.18px; top: 513.5px;"></div><div class="FeaturePoint" style="left: 2225.18px; top: 515.5px;"></div><div class="FeaturePoint" style="left: 2211.18px; top: 514.5px;"></div><div class="FeaturePoint" style="left: 2191.18px; top: 513.5px;"></div><div class="FeaturePoint" style="left: 2181.18px; top: 515.5px;"></div><div class="FeaturePoint" style="left: 2173.18px; top: 516.5px;"></div><div class="FeaturePoint" style="left: 2165.18px; top: 516.5px;"></div><div class="FeaturePoint" style="left: 2155.18px; top: 515.5px;"></div><div class="FeaturePoint" style="left: 2144.18px; top: 515.5px;"></div><div class="FeaturePoint" style="left: 2129.18px; top: 515.5px;"></div><div class="FeaturePoint" style="left: 2116.18px; top: 514.5px;"></div><div class="FeaturePoint" style="left: 2106.18px; top: 512.5px;"></div><div class="FeaturePoint" style="left: 2093.18px; top: 512.5px;"></div><div class="FeaturePoint" style="left: 2080.18px; top: 510.5px;"></div><div class="FeaturePoint" style="left: 2063.18px; top: 507.5px;"></div><div class="FeaturePoint" style="left: 2053.18px; top: 506.5px;"></div><div class="FeaturePoint" style="left: 2046.18px; top: 506.5px;"></div><div class="FeaturePoint" style="left: 2035.18px; top: 506.5px;"></div><div class="FeaturePoint" style="left: 2025.18px; top: 506.5px;"></div><div class="FeaturePoint" style="left: 2016.18px; top: 506.5px;"></div><div class="FeaturePoint" style="left: 2007.18px; top: 505.5px;"></div><div class="FeaturePoint" style="left: 2001.18px; top: 505.5px;"></div><div class="FeaturePoint" style="left: 1985.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1974.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1964.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1955.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1946.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1935.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1922.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1911.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1895.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1885.18px; top: 504.5px;"></div><div class="FeaturePoint" style="left: 1874.18px; top: 503.5px;"></div><div class="FeaturePoint" style="left: 1864.18px; top: 501.5px;"></div><div class="FeaturePoint" style="left: 1852.18px; top: 502.5px;"></div><div class="FeaturePoint" style="left: 1840.18px; top: 499.5px;"></div><div class="FeaturePoint" style="left: 1822.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 1812.18px; top: 497.5px;"></div><div class="FeaturePoint" style="left: 1801.18px; top: 496.5px;"></div><div class="FeaturePoint" style="left: 1789.18px; top: 497.5px;"></div><div class="FeaturePoint" style="left: 1779.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 1767.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 1751.18px; top: 497.5px;"></div><div class="FeaturePoint" style="left: 1735.18px; top: 499.5px;"></div><div class="FeaturePoint" style="left: 1723.18px; top: 499.5px;"></div><div class="FeaturePoint" style="left: 1708.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 1696.18px; top: 497.5px;"></div><div class="FeaturePoint" style="left: 1690.18px; top: 497.5px;"></div><div class="FeaturePoint" style="left: 1683.18px; top: 496.5px;"></div><div class="FeaturePoint" style="left: 1671.18px; top: 495.5px;"></div><div class="FeaturePoint" style="left: 1660.18px; top: 493.5px;"></div><div class="FeaturePoint" style="left: 1645.18px; top: 494.5px;"></div><div class="FeaturePoint" style="left: 1632.18px; top: 493.5px;"></div><div class="FeaturePoint" style="left: 1618.18px; top: 494.5px;"></div><div class="FeaturePoint" style="left: 1605.18px; top: 493.5px;"></div><div class="FeaturePoint" style="left: 1591.18px; top: 491.5px;"></div><div class="FeaturePoint" style="left: 1580.18px; top: 493.5px;"></div><div class="FeaturePoint" style="left: 1565.18px; top: 494.5px;"></div><div class="FeaturePoint" style="left: 1551.18px; top: 496.5px;"></div><div class="FeaturePoint" style="left: 1541.18px; top: 495.5px;"></div><div class="FeaturePoint" style="left: 1525.18px; top: 494.5px;"></div><div class="FeaturePoint" style="left: 1518.18px; top: 496.5px;"></div><div class="FeaturePoint" style="left: 1504.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 1493.18px; top: 499.5px;"></div><div class="FeaturePoint" style="left: 1481.18px; top: 500.5px;"></div><div class="FeaturePoint" style="left: 1468.18px; top: 500.5px;"></div><div class="FeaturePoint" style="left: 1459.18px; top: 501.5px;"></div><div class="FeaturePoint" style="left: 1448.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 1437.18px; top: 496.5px;"></div><div class="FeaturePoint" style="left: 1426.18px; top: 495.5px;"></div><div class="FeaturePoint" style="left: 1420.18px; top: 496.5px;"></div><div class="FeaturePoint" style="left: 1408.18px; top: 494.5px;"></div><div class="FeaturePoint" style="left: 1394.18px; top: 493.5px;"></div><div class="FeaturePoint" style="left: 1372.18px; top: 491.5px;"></div><div class="FeaturePoint" style="left: 1364.18px; top: 488.5px;"></div><div class="FeaturePoint" style="left: 1329.18px; top: 476.5px;"></div><div class="FeaturePoint" style="left: 1288.18px; top: 482.5px;"></div><div class="FeaturePoint" style="left: 1274.18px; top: 486.5px;"></div><div class="FeaturePoint" style="left: 1258.18px; top: 490.5px;"></div><div class="FeaturePoint" style="left: 1248.18px; top: 494.5px;"></div><div class="FeaturePoint" style="left: 1237.18px; top: 498.5px;"></div><div class="FeaturePoint" style="left: 1229.18px; top: 501.5px;"></div><div class="FeaturePoint" style="left: 1215.18px; top: 505.5px;"></div><div class="FeaturePoint" style="left: 1204.18px; top: 507.5px;"></div><div class="FeaturePoint" style="left: 1193.18px; top: 510.5px;"></div><div class="FeaturePoint" style="left: 1177.18px; top: 514.5px;"></div><div class="FeaturePoint" style="left: 1160.18px; top: 517.5px;"></div><div class="FeaturePoint" style="left: 1146.18px; top: 518.5px;"></div><div class="FeaturePoint" style="left: 1126.18px; top: 519.5px;"></div><div class="FeaturePoint" style="left: 1096.18px; top: 510.5px;"></div><div class="FeaturePoint" style="left: 1085.18px; top: 495.5px;"></div><div class="FeaturePoint" style="left: 1088.18px; top: 461.5px;"></div><div class="FeaturePoint" style="left: 1091.18px; top: 440.5px;"></div><div class="FeaturePoint" style="left: 1091.18px; top: 425.5px;"></div><div class="FeaturePoint" style="left: 1093.18px; top: 408.5px;"></div><div class="FeaturePoint" style="left: 1085.18px; top: 393.5px;"></div><div class="FeaturePoint" style="left: 1067.18px; top: 379.5px;"></div><div class="FeaturePoint" style="left: 1053.18px; top: 368.5px;"></div></div>
+
+</body></html>
